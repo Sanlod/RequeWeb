@@ -47,16 +47,62 @@ public class UpdatePasswordView extends VerticalLayout {
                 .set("color", "#a1a1a1")
                 .set("font-size", "12px");
 
+        // Campo nueva contraseña con validación
         PasswordField newPasswordField = new PasswordField();
         newPasswordField.setPlaceholder("New password");
         newPasswordField.setWidth("218px");
 
+        Span newPasswordError = new Span();
+        newPasswordError.getStyle()
+                .set("color", "red")
+                .set("font-size", "11px")
+                .set("display", "none");
+
+        newPasswordField.addValueChangeListener(e -> {
+            String result = validatePassword(e.getValue());
+            if (result != null) {
+                newPasswordError.setText(result);
+                newPasswordError.getStyle().set("display", "block");
+            } else {
+                newPasswordError.getStyle().set("display", "none");
+            }
+        });
+
+        // Campo confirmar contraseña con validación
         PasswordField confirmPasswordField = new PasswordField();
         confirmPasswordField.setPlaceholder("Confirm password");
         confirmPasswordField.setWidth("218px");
 
+        Span confirmPasswordError = new Span();
+        confirmPasswordError.getStyle()
+                .set("color", "red")
+                .set("font-size", "11px")
+                .set("display", "none");
+
+        confirmPasswordField.addValueChangeListener(e -> {
+            if (!e.getValue().equals(newPasswordField.getValue())) {
+                confirmPasswordError.setText("Passwords do not match.");
+                confirmPasswordError.getStyle().set("display", "block");
+            } else {
+                confirmPasswordError.getStyle().set("display", "none");
+            }
+        });
+
         Button confirmButton = new Button("Confirm", e -> {
-            // Lógica para actualizar contraseña
+            String pwdError = validatePassword(newPasswordField.getValue());
+            boolean passwordsMatch = newPasswordField.getValue().equals(confirmPasswordField.getValue());
+
+            if (pwdError != null) {
+                newPasswordError.setText(pwdError);
+                newPasswordError.getStyle().set("display", "block");
+                return;
+            }
+            if (!passwordsMatch) {
+                confirmPasswordError.setText("Passwords do not match.");
+                confirmPasswordError.getStyle().set("display", "block");
+                return;
+            }
+
             navigator.navigateToLogin();
         });
         confirmButton.getStyle()
@@ -73,9 +119,27 @@ public class UpdatePasswordView extends VerticalLayout {
                 .set("font-size", "12px");
         cancelLink.addClickListener(e -> navigator.navigateToLogin());
 
-        mainContainer.add(title, subtitle, updateTitle, confirmationText, newPasswordField, confirmPasswordField, confirmButton, cancelLink);
+        mainContainer.add(
+                title, subtitle, updateTitle, confirmationText,
+                newPasswordField, newPasswordError,
+                confirmPasswordField, confirmPasswordError,
+                confirmButton, cancelLink
+        );
         mainContainer.setAlignItems(Alignment.START);
 
         add(mainContainer);
+    }
+
+    private String validatePassword(String password) {
+        if (password == null || password.length() < 8) {
+            return "Password must be at least 8 characters long, include one uppercase letter and one number.";
+        }
+        if (!password.chars().anyMatch(Character::isUpperCase)) {
+            return "Password must contain at least one uppercase letter.";
+        }
+        if (!password.chars().anyMatch(Character::isDigit)) {
+            return "Password must contain at least one number.";
+        }
+        return null;
     }
 }

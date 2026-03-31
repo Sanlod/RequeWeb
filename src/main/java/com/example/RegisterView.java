@@ -75,13 +75,46 @@ public class RegisterView extends VerticalLayout {
 
         dateLayout.add(dayField, monthField, yearField);
 
+        // Campo de contraseña con validación
         PasswordField passwordField = new PasswordField();
         passwordField.setPlaceholder("Password");
         passwordField.setWidth("218px");
 
+        Span passwordError = new Span();
+        passwordError.getStyle()
+                .set("color", "red")
+                .set("font-size", "11px")
+                .set("display", "none");
+
+        passwordField.addValueChangeListener(e -> {
+            String result = validatePassword(e.getValue());
+            if (result != null) {
+                passwordError.setText(result);
+                passwordError.getStyle().set("display", "block");
+            } else {
+                passwordError.getStyle().set("display", "none");
+            }
+        });
+
+        // Campo de confirmar contraseña con validación
         PasswordField confirmPasswordField = new PasswordField();
         confirmPasswordField.setPlaceholder("Confirm password");
         confirmPasswordField.setWidth("218px");
+
+        Span confirmPasswordError = new Span();
+        confirmPasswordError.getStyle()
+                .set("color", "red")
+                .set("font-size", "11px")
+                .set("display", "none");
+
+        confirmPasswordField.addValueChangeListener(e -> {
+            if (!e.getValue().equals(passwordField.getValue())) {
+                confirmPasswordError.setText("Passwords do not match.");
+                confirmPasswordError.getStyle().set("display", "block");
+            } else {
+                confirmPasswordError.getStyle().set("display", "none");
+            }
+        });
 
         // Términos y condiciones
         Checkbox acceptTerms = new Checkbox("Accept");
@@ -96,7 +129,20 @@ public class RegisterView extends VerticalLayout {
 
         // Botones
         Button registerButton = new Button("Register", e -> {
-            // Aquí iría la lógica de registro
+            String pwdError = validatePassword(passwordField.getValue());
+            boolean passwordsMatch = passwordField.getValue().equals(confirmPasswordField.getValue());
+
+            if (pwdError != null) {
+                passwordError.setText(pwdError);
+                passwordError.getStyle().set("display", "block");
+                return;
+            }
+            if (!passwordsMatch) {
+                confirmPasswordError.setText("Passwords do not match.");
+                confirmPasswordError.getStyle().set("display", "block");
+                return;
+            }
+
             navigator.navigateToLogin();
         });
         registerButton.getStyle()
@@ -115,9 +161,28 @@ public class RegisterView extends VerticalLayout {
 
         HorizontalLayout buttonLayout = new HorizontalLayout(registerButton);
 
-        mainContainer.add(title, subtitle, registerTitle, nameField, lastNameField, emailField, dateLayout, passwordField, confirmPasswordField, termsLayout, buttonLayout, cancelLink);
+        mainContainer.add(
+                title, subtitle, registerTitle,
+                nameField, lastNameField, emailField, dateLayout,
+                passwordField, passwordError,
+                confirmPasswordField, confirmPasswordError,
+                termsLayout, buttonLayout, cancelLink
+        );
         mainContainer.setAlignItems(Alignment.START);
 
         add(mainContainer);
+    }
+
+    private String validatePassword(String password) {
+        if (password == null || password.length() < 8) {
+            return "Password must be at least 8 characters long, include one uppercase letter and one number.";
+        }
+        if (!password.chars().anyMatch(Character::isUpperCase)) {
+            return "Password must contain at least one uppercase letter.";
+        }
+        if (!password.chars().anyMatch(Character::isDigit)) {
+            return "Password must contain at least one number.";
+        }
+        return null;
     }
 }
