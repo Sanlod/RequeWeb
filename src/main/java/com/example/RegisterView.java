@@ -19,8 +19,9 @@ import com.example.ViewNavigator;
 public class RegisterView extends VerticalLayout {
 
     private final ViewNavigator navigator;
-
+    public boolean usuarioCreado = false;
     public RegisterView(ViewNavigator navigator) {
+
         this.navigator = navigator;
 
         setSizeFull();
@@ -48,16 +49,25 @@ public class RegisterView extends VerticalLayout {
 
         // Campos del formulario
         TextField nameField = new TextField();
-        nameField.setPlaceholder("Name");
+        nameField.setPlaceholder("Username");
         nameField.setWidth("218px");
+        nameField.setMinLength(4);
 
-        TextField lastNameField = new TextField();
-        lastNameField.setPlaceholder("Last name");
-        lastNameField.setWidth("218px");
+        Span nameError = new Span("Username too short");
+        nameError.getStyle()
+                .set("color", "red")
+                .set("font-size", "11px")
+                .set("display", "none");
 
         EmailField emailField = new EmailField();
         emailField.setPlaceholder("someone@example.com");
         emailField.setWidth("218px");
+
+        Span emailError = new Span("Please enter a valid email address");
+        emailError.getStyle()
+                .set("color", "red")
+                .set("display","none")
+                .set("font-size", "11px");
 
         // Campos de fecha
         HorizontalLayout dateLayout = new HorizontalLayout();
@@ -124,6 +134,12 @@ public class RegisterView extends VerticalLayout {
                 .set("text-decoration", "underline")
                 .set("cursor", "pointer");
 
+        Span acceptTermsError = new Span("Terms and conditions are disabled");
+        acceptTermsError.getStyle()
+                .set("color", "red")
+                .set("display", "none")
+                .set("font-size", "11px");
+
         HorizontalLayout termsLayout = new HorizontalLayout(acceptTerms, termsLink);
         termsLayout.setAlignItems(Alignment.CENTER);
 
@@ -131,7 +147,20 @@ public class RegisterView extends VerticalLayout {
         Button registerButton = new Button("Register", e -> {
             String pwdError = validatePassword(passwordField.getValue());
             boolean passwordsMatch = passwordField.getValue().equals(confirmPasswordField.getValue());
-
+            if(nameField.isInvalid() || nameField.isEmpty()) {
+                nameError.getStyle().set("display", "block");
+                return;
+            }
+            else{
+                nameError.getStyle().set("display", "none");
+            }
+            if (emailField.isInvalid() || emailField.isEmpty()) {
+                emailError.getStyle().set("display", "block");
+                return;
+            }
+            else{
+                emailError.getStyle().set("display", "none");
+            }
             if (pwdError != null) {
                 passwordError.setText(pwdError);
                 passwordError.getStyle().set("display", "block");
@@ -142,7 +171,14 @@ public class RegisterView extends VerticalLayout {
                 confirmPasswordError.getStyle().set("display", "block");
                 return;
             }
-
+            if(acceptTerms.getValue() != true) {
+                acceptTermsError.getStyle().set("display", "block");
+                return;
+            }
+            else{
+                acceptTermsError.getStyle().set("display", "none");
+            }
+            usuarioCreado = true;
             navigator.navigateToLogin();
         });
         registerButton.getStyle()
@@ -163,12 +199,13 @@ public class RegisterView extends VerticalLayout {
 
         mainContainer.add(
                 title, subtitle, registerTitle,
-                nameField, lastNameField, emailField, dateLayout,
+                nameField, nameError ,emailField,emailError, dateLayout,
                 passwordField, passwordError,
                 confirmPasswordField, confirmPasswordError,
-                termsLayout, buttonLayout, cancelLink
+                termsLayout, acceptTermsError,buttonLayout, cancelLink
         );
         mainContainer.setAlignItems(Alignment.START);
+        mainContainer.setHeight("auto");
 
         add(mainContainer);
     }

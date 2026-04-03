@@ -9,6 +9,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.component.notification.Notification;
@@ -22,7 +23,6 @@ public class MainView extends VerticalLayout {
 
     public MainView(ViewNavigator navigator) {
         this.navigator = navigator;
-
         setSizeFull();
         setAlignItems(Alignment.CENTER);
         setJustifyContentMode(JustifyContentMode.CENTER);
@@ -88,10 +88,21 @@ public class MainView extends VerticalLayout {
         HorizontalLayout buttonLayout = new HorizontalLayout(registerButton, loginButton);
         buttonLayout.setSpacing(true);
 
+        Span cuentaCreada = new Span("Cuenta creada satisfactoriamente");
+        cuentaCreada.getStyle()
+                .set("color", "black")
+                .set("font", "11px solid black")
+                .set("display", "none");
+
+
         // Organizar componentes
-        mainContainer.add(title, subtitle, loginTitle, usernameField, passwordField, forgotPassword, buttonLayout);
+        mainContainer.add(title, subtitle, loginTitle, usernameField, passwordField, forgotPassword, buttonLayout, cuentaCreada);
         mainContainer.setAlignItems(Alignment.START);
 
         add(mainContainer);
+    }
+
+    public boolean habilitarCuentaCreada(){
+        return true;
     }
 }
