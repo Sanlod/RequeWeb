@@ -14,12 +14,18 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.example.ViewNavigator;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+
 @Route("register")
 @PageTitle("Register - Website")
 public class RegisterView extends VerticalLayout {
 
+
+
     private final ViewNavigator navigator;
-    public boolean usuarioCreado = false;
     public RegisterView(ViewNavigator navigator) {
 
         this.navigator = navigator;
@@ -178,7 +184,14 @@ public class RegisterView extends VerticalLayout {
             else{
                 acceptTermsError.getStyle().set("display", "none");
             }
-            usuarioCreado = true;
+
+            try {
+                guardarData(nameField.getValue(), passwordField.getValue());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+
             navigator.navigateToLogin();
         });
         registerButton.getStyle()
@@ -221,5 +234,14 @@ public class RegisterView extends VerticalLayout {
             return "Password must contain at least one number.";
         }
         return null;
+    }
+
+    private void guardarData(String username, String password) throws IOException {
+        BufferedWriter boffer = new BufferedWriter(new FileWriter("src/main/resources/loginData")) {};
+        boffer.write(username);
+        boffer.write("\n");
+        boffer.write(password);
+        boffer.close();
+        System.out.println("Data guardado com sucesso!");
     }
 }

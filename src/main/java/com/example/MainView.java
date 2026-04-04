@@ -6,21 +6,24 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.component.notification.Notification;
-import com.example.ViewNavigator;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Route("")
 @PageTitle("Login - Website")
 public class MainView extends VerticalLayout {
 
     private final ViewNavigator navigator;
-
+    private String username;
+    private String password;
     public MainView(ViewNavigator navigator) {
         this.navigator = navigator;
         setSizeFull();
@@ -52,6 +55,9 @@ public class MainView extends VerticalLayout {
         TextField usernameField = new TextField();
         usernameField.setPlaceholder("Email, Phone, Username...");
         usernameField.setWidth("218px");
+        usernameField.addValueChangeListener(e -> {
+
+        });
 
         PasswordField passwordField = new PasswordField();
         passwordField.setPlaceholder("Password");
@@ -66,10 +72,27 @@ public class MainView extends VerticalLayout {
                 .set("font-size", "12px");
         forgotPassword.addClickListener(e -> navigator.navigateToVerification());
 
+        Span errorLogin = new Span("Incorrect username or password");
+        errorLogin.getStyle()
+                .set("color", "red")
+                .set("display", "none")
+                .set("font-size", "11px");
+
         // Botones
         Button loginButton = new Button("Log in", e -> {
             // Aquí iría la lógica de autenticación
-            navigator.navigateToLandingSpot();
+        });
+        loginButton.addClickListener(e -> {
+            try {
+                if(checkearDatos(usernameField.getValue(), passwordField.getValue())) {
+                    navigator.navigateToLandingSpot();
+                }
+                else{
+                    errorLogin.getStyle().set("display", "block");
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         });
         loginButton.getStyle()
                 .set("background-color", "#004aad")
@@ -96,13 +119,21 @@ public class MainView extends VerticalLayout {
 
 
         // Organizar componentes
-        mainContainer.add(title, subtitle, loginTitle, usernameField, passwordField, forgotPassword, buttonLayout, cuentaCreada);
+        mainContainer.add(title, subtitle, loginTitle, usernameField, passwordField, forgotPassword, buttonLayout, errorLogin,cuentaCreada);
         mainContainer.setAlignItems(Alignment.START);
 
         add(mainContainer);
     }
 
-    public boolean habilitarCuentaCreada(){
-        return true;
+
+    public boolean checkearDatos(String username, String password) throws IOException {
+        BufferedReader boffer = new BufferedReader(new FileReader("src/main/resources/loginData")){};
+        String usuario = boffer.readLine();
+        String contra = boffer.readLine();
+        boffer.close();
+        System.out.println("Data leida com  sucesso!");
+        System.out.println("Usuario: " + usuario);
+        System.out.println("Contra: " + contra);
+        return usuario.equals(username) && contra.equals(password);
     }
 }
