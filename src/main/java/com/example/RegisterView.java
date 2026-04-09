@@ -192,7 +192,13 @@ public class RegisterView extends VerticalLayout {
             }
 
 
-            navigator.navigateToLogin();
+            getUI().ifPresent(ui ->
+                    ui.navigate(MainView.class,
+                            new com.vaadin.flow.router.QueryParameters(
+                                    java.util.Map.of("success", java.util.List.of("registered"))
+                            )
+                    )
+            );
         });
         registerButton.getStyle()
                 .set("background-color", "#004aad")

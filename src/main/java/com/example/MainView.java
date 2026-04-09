@@ -4,10 +4,13 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
@@ -19,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Route("")
 @PageTitle("Login - Website")
-public class MainView extends VerticalLayout {
+public class MainView extends VerticalLayout implements BeforeEnterObserver {
 
     private final ViewNavigator navigator;
     private String username;
@@ -135,5 +138,18 @@ public class MainView extends VerticalLayout {
         System.out.println("Usuario: " + usuario);
         System.out.println("Contra: " + contra);
         return usuario.equals(username) && contra.equals(password);
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
+        String success = beforeEnterEvent.getLocation()
+                .getQueryParameters()
+                .getParameters()
+                .getOrDefault("success", java.util.List.of(""))
+                .get(0);
+
+        if ("registered".equals(success)) {
+            Notification.show("Usuario creado exitosamente");
+        }
     }
 }
