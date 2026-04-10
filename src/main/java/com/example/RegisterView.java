@@ -5,6 +5,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -18,6 +19,9 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
 @Route("register")
 @PageTitle("Register - Website")
@@ -178,6 +182,7 @@ public class RegisterView extends VerticalLayout {
                 return;
             }
             if(acceptTerms.getValue() != true) {
+                acceptTermsError.setText("Terms and conditions are disabled");
                 acceptTermsError.getStyle().set("display", "block");
                 return;
             }
@@ -186,19 +191,26 @@ public class RegisterView extends VerticalLayout {
             }
 
             try {
-                guardarData(nameField.getValue(), passwordField.getValue());
+                if(guardarData(nameField.getValue(), passwordField.getValue(), emailField.getValue())){
+                    getUI().ifPresent(ui ->
+                            ui.navigate(MainView.class,
+                                    new com.vaadin.flow.router.QueryParameters(
+                                            java.util.Map.of("success", java.util.List.of("registered"))
+                                    )
+                            )
+                    );
+                }
+                else {
+                    acceptTermsError.getStyle().set("display", "block");
+                    acceptTermsError.setText("Usuario o correo ya existentes");
+                }
+
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
 
 
-            getUI().ifPresent(ui ->
-                    ui.navigate(MainView.class,
-                            new com.vaadin.flow.router.QueryParameters(
-                                    java.util.Map.of("success", java.util.List.of("registered"))
-                            )
-                    )
-            );
+
         });
         registerButton.getStyle()
                 .set("background-color", "#004aad")
@@ -242,12 +254,36 @@ public class RegisterView extends VerticalLayout {
         return null;
     }
 
-    private void guardarData(String username, String password) throws IOException {
-        BufferedWriter boffer = new BufferedWriter(new FileWriter("src/main/resources/loginData")) {};
-        boffer.write(username);
-        boffer.write("\n");
-        boffer.write(password);
-        boffer.close();
-        System.out.println("Data guardado com sucesso!");
+    private boolean guardarData(String username, String password, String email) throws IOException {
+        if (!userOrEmailExists(username,email)) {
+            BufferedWriter boffer = new BufferedWriter(new FileWriter("src/main/resources/loginData")) {
+            };
+            boffer.write(username);
+            boffer.write("\n");
+            boffer.write(password);
+            boffer.write("\n");
+            boffer.write(email);
+            boffer.close();
+            System.out.println("Data guardado com sucesso!");
+            return true;
+        }
+        return false;
+    }
+
+    private boolean userOrEmailExists(String username, String email) {
+        try {
+            List<String> lines = Files.readAllLines(Paths.get("src/main/resources/loginData"));
+
+            if (lines.size() >= 3) {
+                String existingUser = lines.get(0);
+                String existingEmail = lines.get(2);
+
+                return existingUser.equals(username) || existingEmail.equals(email);
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
