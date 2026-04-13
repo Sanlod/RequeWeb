@@ -14,6 +14,7 @@ import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -54,17 +55,37 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
 
         H2 loginTitle = new H2("Log in");
 
+        //Boton Log in
+        Button loginButton = new Button("Log in");
+
+
+
         // Formulario
         TextField usernameField = new TextField();
+        PasswordField passwordField = new PasswordField();
+
         usernameField.setPlaceholder("Email, Phone, Username...");
         usernameField.setWidth("218px");
         usernameField.addValueChangeListener(e -> {
-
+            loginButton.setEnabled(!usernameField.isEmpty() && !passwordField.isEmpty());
         });
+        Span userError = new Span("Please enter a valid username.");
+        userError.getStyle()
+                .set("color", "red")
+                .set("font-size", "11px")
+                .set("display", "none");
 
-        PasswordField passwordField = new PasswordField();
+        passwordField.addValueChangeListener(e -> {
+            loginButton.setEnabled(!usernameField.isEmpty() && !passwordField.isEmpty());
+        });
         passwordField.setPlaceholder("Password");
         passwordField.setWidth("218px");
+        Span passwordError = new Span("Please enter a valid password.");
+        passwordError.getStyle()
+                .set("color", "red")
+                .set("font-size", "11px")
+                .set("display", "none");
+
 
         // Botón de olvidé contraseña
         Span forgotPassword = new Span("Forgot my password");
@@ -82,21 +103,45 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
                 .set("font-size", "11px");
 
         // Botones
-        Button loginButton = new Button("Log in", e -> {
-            // Aquí iría la lógica de autenticación
-        });
+
+
         loginButton.addClickListener(e -> {
+            if (passwordField.getValue().trim().isEmpty()) {
+                passwordError.getStyle().set("display", "block");
+                return;
+            } else {
+                passwordError.getStyle().set("display", "none");
+            }
+
+
             try {
-                if(checkearDatos(usernameField.getValue(), passwordField.getValue())) {
+                if (checkearDatos(usernameField.getValue(), passwordField.getValue())) {
                     navigator.navigateToLandingSpot();
-                }
-                else{
+                } else {
                     errorLogin.getStyle().set("display", "block");
                 }
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         });
+        loginButton.addClickListener(e -> {
+            if (usernameField.getValue().trim().isEmpty()) {
+                userError.getStyle().set("display", "block");
+                return;
+            } else {
+                userError.getStyle().set("display", "none");
+            }
+            try {
+                if (checkearDatos(usernameField.getValue(), passwordField.getValue())) {
+                    navigator.navigateToLandingSpot();
+                } else {
+                    errorLogin.getStyle().set("display", "block");
+                }
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
         loginButton.getStyle()
                 .set("background-color", "#004aad")
                 .set("color", "white")
@@ -122,7 +167,7 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
 
 
         // Organizar componentes
-        mainContainer.add(title, subtitle, loginTitle, usernameField, passwordField, forgotPassword, buttonLayout, errorLogin,cuentaCreada);
+        mainContainer.add(title, subtitle, loginTitle, usernameField, userError, passwordField, passwordError, forgotPassword, buttonLayout, errorLogin,cuentaCreada);
         mainContainer.setAlignItems(Alignment.START);
 
         add(mainContainer);
