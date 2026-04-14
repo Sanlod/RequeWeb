@@ -90,8 +90,8 @@ public class RegisterView extends VerticalLayout {
         monthField.setWidth("41px");
 
         TextField yearField = new TextField();
-        yearField.setPlaceholder("YY");
-        yearField.setWidth("41px");
+        yearField.setPlaceholder("YYYY");
+        yearField.setWidth("55px");
 
         dateLayout.add(dayField, monthField, yearField);
 

@@ -18,6 +18,8 @@ import com.example.ViewNavigator;
 public class VerificationView extends VerticalLayout {
 
     private final ViewNavigator navigator;
+    public static String currentEmail = "";
+
 
     public VerificationView(ViewNavigator navigator) {
         this.navigator = navigator;
@@ -59,6 +61,7 @@ public class VerificationView extends VerticalLayout {
                 emailError.getStyle().set("display", "block");
             } else {
                 emailError.getStyle().set("display", "none");
+                currentEmail = emailField.getValue();
                 Notification.show("Code sent to " + emailField.getValue());
             }
         });

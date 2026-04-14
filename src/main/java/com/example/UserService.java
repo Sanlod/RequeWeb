@@ -1,7 +1,14 @@
 package com.example;
 
 import org.springframework.stereotype.Service;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,7 +39,26 @@ public class UserService {
     }
 
     public boolean updatePassword(String email, String newPassword) {
-        // Lógica para actualizar contraseña
-        return true;
+        try {
+            List<String> lines = Files.readAllLines(Paths.get("src/main/resources/loginData"));
+
+            if (lines.size() >= 3) {
+                String existingEmail = lines.get(2);
+
+                if (existingEmail.equals(email)) {
+                    BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/loginData"));
+                    writer.write(lines.get(0));
+                    writer.newLine();
+                    writer.write(newPassword);
+                    writer.newLine();
+                    writer.write(existingEmail);
+                    writer.close();
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

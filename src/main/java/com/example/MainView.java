@@ -28,6 +28,7 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
     private final ViewNavigator navigator;
     private String username;
     private String password;
+    private Span cuentaCreada;
     public MainView(ViewNavigator navigator) {
         this.navigator = navigator;
         setSizeFull();
@@ -159,7 +160,7 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
         HorizontalLayout buttonLayout = new HorizontalLayout(registerButton, loginButton);
         buttonLayout.setSpacing(true);
 
-        Span cuentaCreada = new Span("Cuenta creada satisfactoriamente");
+        cuentaCreada = new Span("Cuenta creada satisfactoriamente");
         cuentaCreada.getStyle()
                 .set("color", "black")
                 .set("font", "11px solid black")
@@ -194,7 +195,7 @@ public class MainView extends VerticalLayout implements BeforeEnterObserver {
                 .get(0);
 
         if ("registered".equals(success)) {
-            Notification.show("Usuario creado exitosamente");
+            cuentaCreada.getStyle().set("display", "block");
         }
     }
 }

@@ -15,9 +15,11 @@ import com.example.ViewNavigator;
 public class UpdatePasswordView extends VerticalLayout {
 
     private final ViewNavigator navigator;
+    private final UserService userService;
 
-    public UpdatePasswordView(ViewNavigator navigator) {
+    public UpdatePasswordView(ViewNavigator navigator, UserService userService) {
         this.navigator = navigator;
+        this.userService = userService;
 
         setSizeFull();
         setAlignItems(Alignment.CENTER);
@@ -103,6 +105,18 @@ public class UpdatePasswordView extends VerticalLayout {
                 return;
             }
 
+            boolean updated = userService.updatePassword(
+                    VerificationView.currentEmail,
+                    newPasswordField.getValue()
+            );
+
+            if (updated) {
+                navigator.navigateToLogin();
+            } else {
+                newPasswordError.setText("Email not found.");
+                newPasswordError.getStyle().set("display", "block");
+            }
+
             navigator.navigateToLogin();
         });
         confirmButton.getStyle()
@@ -110,6 +124,7 @@ public class UpdatePasswordView extends VerticalLayout {
                 .set("color", "white")
                 .set("width", "104px")
                 .set("height", "37px");
+
 
         Span cancelLink = new Span("Cancel and go to log in");
         cancelLink.getStyle()
@@ -142,4 +157,5 @@ public class UpdatePasswordView extends VerticalLayout {
         }
         return null;
     }
+
 }
